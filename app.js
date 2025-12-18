@@ -10,6 +10,7 @@
   const status = document.getElementById("qr-status");
   const versionField = document.getElementById("qr-version");
   const sizeField = document.getElementById("qr-size");
+  const eclField = document.getElementById("qr-ecl-display");
   const maskField = document.getElementById("qr-mask");
 
   const eclMap = {
@@ -73,12 +74,14 @@
   const setMeta = (qr) => {
     versionField.textContent = qr.version;
     sizeField.textContent = `${qr.size} × ${qr.size}`;
+    eclField.textContent = eclSelect.selectedOptions[0].textContent;
     maskField.textContent = qr.mask;
   };
 
   const resetMeta = () => {
     versionField.textContent = "–";
     sizeField.textContent = "–";
+    eclField.textContent = "–";
     maskField.textContent = "–";
   };
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Code Generator</title>
+  <title>QR Code Hidden Message Generator</title>
   <link rel="preload" href="./qrcodegen-v1.8.0-es6.js" as="script">
   <style>
     :root {
@@ -166,14 +166,14 @@
 <body>
   <main class="app">
     <header>
-      <h1>QR Code Generator</h1>
-      <p>Enter your message and pick an error correction level to instantly create a QR code.</p>
+      <h1>QR Code Hidden Message Generator</h1>
+      <p>Encode visible text plus an optional hidden UTF-8 message placed in the QR padding area.</p>
     </header>
 
     <form id="qr-form">
       <label>
         Message to encode
-        <textarea id="qr-text" required placeholder="Type the text to convert into a QR code">Hello from QrHiddenMessage!</textarea>
+        <textarea id="qr-text" required placeholder="Type the text to convert into a QR code with an optional hidden payload">Hello from QrHiddenMessage!</textarea>
       </label>
 
       <label>
@@ -218,6 +218,10 @@
           <div>
             <strong>Size (modules)</strong>
             <span id="qr-size">–</span>
+          </div>
+          <div>
+            <strong>Error correction</strong>
+            <span id="qr-ecl-display">–</span>
           </div>
           <div>
             <strong>Mask</strong>
