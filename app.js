@@ -2,6 +2,7 @@
   const form = document.getElementById("qr-form");
   const textInput = document.getElementById("qr-text");
   const hiddenInput = document.getElementById("qr-hidden");
+  const qrImage = document.getElementById("qr-image");
   const eclSelect = document.getElementById("qr-ecl");
   const scaleInput = document.getElementById("qr-scale");
   const marginInput = document.getElementById("qr-margin");
@@ -61,6 +62,12 @@
         }
       }
     }
+
+    const dataUrl = canvasEl.toDataURL("image/png");
+    qrImage.src = dataUrl;
+    qrImage.width = size;
+    qrImage.height = size;
+    qrImage.alt = "QR code preview. Long-press to save or open in a new tab.";
   };
 
   const setMeta = (qr) => {
@@ -78,6 +85,7 @@
   const clearCanvas = (canvasEl) => {
     const ctx = canvasEl.getContext("2d");
     ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+    qrImage.removeAttribute("src");
   };
 
   const clamp = (value, min, max) => Math.min(Math.max(value, min), max);

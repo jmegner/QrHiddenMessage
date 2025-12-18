@@ -116,7 +116,7 @@
       grid-template-columns: 1fr;
     }
 
-    canvas {
+    .qr-visual {
       justify-self: center;
       border-radius: 12px;
       background: #fff;
@@ -208,7 +208,8 @@
 
     <section class="output">
       <div>
-        <canvas id="qr-canvas" width="240" height="240" aria-label="QR code preview"></canvas>
+        <img id="qr-image" class="qr-visual" alt="QR code preview will appear here" />
+        <canvas id="qr-canvas" width="240" height="240" hidden aria-hidden="true"></canvas>
         <div class="qr-meta" aria-live="polite">
           <div>
             <strong>Version</strong>
