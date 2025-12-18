@@ -1,6 +1,7 @@
 (() => {
   const form = document.getElementById("qr-form");
   const textInput = document.getElementById("qr-text");
+  const hiddenInput = document.getElementById("qr-hidden");
   const eclSelect = document.getElementById("qr-ecl");
   const scaleInput = document.getElementById("qr-scale");
   const marginInput = document.getElementById("qr-margin");
@@ -19,6 +20,7 @@
 
   const renderQr = () => {
     const message = textInput.value.trim();
+    const hiddenMessage = hiddenInput.value;
     const scale = clamp(parseInt(scaleInput.value, 10) || 8, 2, 20);
     const margin = clamp(parseInt(marginInput.value, 10) || 4, 0, 10);
 
@@ -32,7 +34,7 @@
     const ecl = eclMap[eclSelect.value] ?? qrcodegen.QrCode.Ecc.LOW;
 
     try {
-      const qr = qrcodegen.QrCode.encodeText(message, ecl);
+      const qr = qrcodegen.QrCode.encodeText(message, ecl, hiddenMessage);
       drawCanvas(qr, canvas, scale, margin);
       status.textContent = `QR code generated with ${eclSelect.selectedOptions[0].textContent}.`;
       setMeta(qr);
@@ -87,6 +89,7 @@
 
   ["input", "change"].forEach((eventName) => {
     textInput.addEventListener(eventName, renderQr);
+    hiddenInput.addEventListener(eventName, renderQr);
     eclSelect.addEventListener(eventName, renderQr);
     scaleInput.addEventListener(eventName, renderQr);
     marginInput.addEventListener(eventName, renderQr);

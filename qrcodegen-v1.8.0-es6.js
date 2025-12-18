@@ -103,17 +103,17 @@ var qrcodegen;
         // Unicode code points (not UTF-16 code units) if the low error correction level is used. The smallest possible
         // QR Code version is automatically chosen for the output. The ECC level of the result may be higher than the
         // ecl argument if it can be done without increasing the version.
-        static encodeText(text, ecl) {
+        static encodeText(text, ecl, hiddenMessage = "") {
             const segs = qrcodegen.QrSegment.makeSegments(text);
-            return QrCode.encodeSegments(segs, ecl);
+            return QrCode.encodeSegments(segs, ecl, 1, 40, -1, true, hiddenMessage);
         }
         // Returns a QR Code representing the given binary data at the given error correction level.
         // This function always encodes using the binary segment mode, not any text mode. The maximum number of
         // bytes allowed is 2953. The smallest possible QR Code version is automatically chosen for the output.
         // The ECC level of the result may be higher than the ecl argument if it can be done without increasing the version.
-        static encodeBinary(data, ecl) {
+        static encodeBinary(data, ecl, hiddenMessage = "") {
             const seg = qrcodegen.QrSegment.makeBytes(data);
-            return QrCode.encodeSegments([seg], ecl);
+            return QrCode.encodeSegments([seg], ecl, 1, 40, -1, true, hiddenMessage);
         }
         /*-- Static factory functions (mid level) --*/
         // Returns a QR Code representing the given segments with the given encoding parameters.
@@ -125,17 +125,30 @@ var qrcodegen;
         // This function allows the user to create a custom sequence of segments that switches
         // between modes (such as alphanumeric and byte) to encode text in less space.
         // This is a mid-level API; the high-level API is encodeText() and encodeBinary().
-        static encodeSegments(segs, ecl, minVersion = 1, maxVersion = 40, mask = -1, boostEcl = true) {
+        static encodeSegments(segs, ecl, minVersion = 1, maxVersion = 40, mask = -1, boostEcl = true, hiddenMessage = "") {
             if (!(QrCode.MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= QrCode.MAX_VERSION)
                 || mask < -1 || mask > 7)
                 throw new RangeError("Invalid value");
+            const hiddenBytes = hiddenMessage ? qrcodegen.QrSegment.toUtf8ByteArray(hiddenMessage) : [];
+            const hasRoomForHiddenMessage = (usedBits, capacityBits) => {
+                if (usedBits > capacityBits)
+                    return false;
+                let totalBits = usedBits;
+                totalBits += Math.min(4, capacityBits - totalBits);
+                totalBits += (8 - totalBits % 8) % 8;
+                const remainingBits = capacityBits - totalBits;
+                if (remainingBits < 0 || remainingBits % 8 != 0)
+                    return false;
+                const remainingBytes = remainingBits / 8;
+                return hiddenBytes.length <= remainingBytes;
+            };
             // Find the minimal version number to use
             let version;
             let dataUsedBits;
             for (version = minVersion;; version++) {
                 const dataCapacityBits = QrCode.getNumDataCodewords(version, ecl) * 8; // Number of data bits available
                 const usedBits = QrSegment.getTotalBits(segs, version);
-                if (usedBits <= dataCapacityBits) {
+                if (hasRoomForHiddenMessage(usedBits, dataCapacityBits)) {
                     dataUsedBits = usedBits;
                     break; // This version number is found to be suitable
                 }
@@ -144,7 +157,7 @@ var qrcodegen;
             }
             // Increase the error correction level while the data still fits in the current version number
             for (const newEcl of [QrCode.Ecc.MEDIUM, QrCode.Ecc.QUARTILE, QrCode.Ecc.HIGH]) { // From low to high
-                if (boostEcl && dataUsedBits <= QrCode.getNumDataCodewords(version, newEcl) * 8)
+                if (boostEcl && hasRoomForHiddenMessage(dataUsedBits, QrCode.getNumDataCodewords(version, newEcl) * 8))
                     ecl = newEcl;
             }
             // Concatenate all segments to create the data bit string
@@ -162,9 +175,23 @@ var qrcodegen;
             appendBits(0, Math.min(4, dataCapacityBits - bb.length), bb);
             appendBits(0, (8 - bb.length % 8) % 8, bb);
             assert(bb.length % 8 == 0);
+            let remainingBits = dataCapacityBits - bb.length;
+            // Embed the hidden message bytes into the padding area.
+            for (const b of hiddenBytes)
+                appendBits(b, 8, bb);
+            remainingBits -= hiddenBytes.length * 8;
+            if (remainingBits < 0)
+                throw new RangeError("Data too long");
+            if (remainingBits > 0) {
+                appendBits(0, 8, bb);
+                remainingBits -= 8;
+            }
             // Pad with alternating bytes until data capacity is reached
-            for (let padByte = 0xEC; bb.length < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
+            for (let padByte = 0xEC; remainingBits > 0; padByte ^= 0xEC ^ 0x11) {
                 appendBits(padByte, 8, bb);
+                remainingBits -= 8;
+            }
+            assert(bb.length == dataCapacityBits);
             // Pack bits into bytes in big endian
             let dataCodewords = [];
             while (dataCodewords.length * 8 < bb.length)
