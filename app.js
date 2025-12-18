@@ -1,6 +1,8 @@
 (() => {
   const form = document.getElementById("qr-form");
   const textInput = document.getElementById("qr-text");
+  const hiddenInput = document.getElementById("qr-hidden");
+  const qrImage = document.getElementById("qr-image");
   const eclSelect = document.getElementById("qr-ecl");
   const scaleInput = document.getElementById("qr-scale");
   const marginInput = document.getElementById("qr-margin");
@@ -8,6 +10,7 @@
   const status = document.getElementById("qr-status");
   const versionField = document.getElementById("qr-version");
   const sizeField = document.getElementById("qr-size");
+  const eclField = document.getElementById("qr-ecl-display");
   const maskField = document.getElementById("qr-mask");
 
   const eclMap = {
@@ -19,6 +22,7 @@
 
   const renderQr = () => {
     const message = textInput.value.trim();
+    const hiddenMessage = hiddenInput.value;
     const scale = clamp(parseInt(scaleInput.value, 10) || 8, 2, 20);
     const margin = clamp(parseInt(marginInput.value, 10) || 4, 0, 10);
 
@@ -32,7 +36,7 @@
     const ecl = eclMap[eclSelect.value] ?? qrcodegen.QrCode.Ecc.LOW;
 
     try {
-      const qr = qrcodegen.QrCode.encodeText(message, ecl);
+      const qr = qrcodegen.QrCode.encodeText(message, ecl, hiddenMessage);
       drawCanvas(qr, canvas, scale, margin);
       status.textContent = `QR code generated with ${eclSelect.selectedOptions[0].textContent}.`;
       setMeta(qr);
@@ -59,23 +63,32 @@
         }
       }
     }
+
+    const dataUrl = canvasEl.toDataURL("image/png");
+    qrImage.src = dataUrl;
+    qrImage.width = size;
+    qrImage.height = size;
+    qrImage.alt = "QR code preview. Long-press to save or open in a new tab.";
   };
 
   const setMeta = (qr) => {
     versionField.textContent = qr.version;
     sizeField.textContent = `${qr.size} × ${qr.size}`;
+    eclField.textContent = eclSelect.selectedOptions[0].textContent;
     maskField.textContent = qr.mask;
   };
 
   const resetMeta = () => {
     versionField.textContent = "–";
     sizeField.textContent = "–";
+    eclField.textContent = "–";
     maskField.textContent = "–";
   };
 
   const clearCanvas = (canvasEl) => {
     const ctx = canvasEl.getContext("2d");
     ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+    qrImage.removeAttribute("src");
   };
 
   const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
@@ -87,6 +100,7 @@
 
   ["input", "change"].forEach((eventName) => {
     textInput.addEventListener(eventName, renderQr);
+    hiddenInput.addEventListener(eventName, renderQr);
     eclSelect.addEventListener(eventName, renderQr);
     scaleInput.addEventListener(eventName, renderQr);
     marginInput.addEventListener(eventName, renderQr);
