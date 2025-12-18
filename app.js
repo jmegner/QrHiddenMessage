@@ -29,7 +29,7 @@
       return;
     }
 
-    const ecl = eclMap[eclSelect.value] ?? qrcodegen.QrCode.Ecc.MEDIUM;
+    const ecl = eclMap[eclSelect.value] ?? qrcodegen.QrCode.Ecc.LOW;
 
     try {
       const qr = qrcodegen.QrCode.encodeText(message, ecl);
