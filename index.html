@@ -126,6 +126,30 @@
       color: #444;
     }
 
+    .qr-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 12px;
+      color: #111827;
+    }
+
+    .qr-meta strong {
+      display: block;
+      font-size: 13px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .qr-meta span {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
     @media (min-width: 800px) {
       form {
         grid-template-columns: 1.3fr 1fr;
@@ -178,6 +202,20 @@
     <section class="output">
       <div>
         <canvas id="qr-canvas" width="240" height="240" aria-label="QR code preview"></canvas>
+        <div class="qr-meta" aria-live="polite">
+          <div>
+            <strong>Version</strong>
+            <span id="qr-version">–</span>
+          </div>
+          <div>
+            <strong>Size (modules)</strong>
+            <span id="qr-size">–</span>
+          </div>
+          <div>
+            <strong>Mask</strong>
+            <span id="qr-mask">–</span>
+          </div>
+        </div>
       </div>
       <p class="status" id="qr-status">Ready to generate your QR code.</p>
     </section>

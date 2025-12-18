@@ -6,6 +6,9 @@
   const marginInput = document.getElementById("qr-margin");
   const canvas = document.getElementById("qr-canvas");
   const status = document.getElementById("qr-status");
+  const versionField = document.getElementById("qr-version");
+  const sizeField = document.getElementById("qr-size");
+  const maskField = document.getElementById("qr-mask");
 
   const eclMap = {
     L: qrcodegen.QrCode.Ecc.LOW,
@@ -22,6 +25,7 @@
     if (!message) {
       status.textContent = "Enter text to generate a QR code.";
       clearCanvas(canvas);
+      resetMeta();
       return;
     }
 
@@ -31,9 +35,11 @@
       const qr = qrcodegen.QrCode.encodeText(message, ecl);
       drawCanvas(qr, canvas, scale, margin);
       status.textContent = `QR code generated with ${eclSelect.selectedOptions[0].textContent}.`;
+      setMeta(qr);
     } catch (error) {
       clearCanvas(canvas);
       status.textContent = `Unable to generate QR code: ${error.message}`;
+      resetMeta();
     }
   };
 
@@ -53,6 +59,18 @@
         }
       }
     }
+  };
+
+  const setMeta = (qr) => {
+    versionField.textContent = qr.version;
+    sizeField.textContent = `${qr.size} × ${qr.size}`;
+    maskField.textContent = qr.mask;
+  };
+
+  const resetMeta = () => {
+    versionField.textContent = "–";
+    sizeField.textContent = "–";
+    maskField.textContent = "–";
   };
 
   const clearCanvas = (canvasEl) => {
