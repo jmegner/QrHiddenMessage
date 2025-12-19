@@ -20,6 +20,13 @@
     H: qrcodegen.QrCode.Ecc.HIGH,
   };
 
+  const eclDisplay = new Map([
+    [qrcodegen.QrCode.Ecc.LOW, "Low (7% tolerance)"],
+    [qrcodegen.QrCode.Ecc.MEDIUM, "Medium (15% tolerance)"],
+    [qrcodegen.QrCode.Ecc.QUARTILE, "Quartile (25% tolerance)"],
+    [qrcodegen.QrCode.Ecc.HIGH, "High (30% tolerance)"],
+  ]);
+
   const renderQr = () => {
     const message = textInput.value.trim();
     const hiddenMessage = hiddenInput.value;
@@ -74,7 +81,7 @@
   const setMeta = (qr) => {
     versionField.textContent = qr.version;
     sizeField.textContent = `${qr.size} × ${qr.size}`;
-    eclField.textContent = eclSelect.selectedOptions[0].textContent;
+    eclField.textContent = eclDisplay.get(qr.errorCorrectionLevel) ?? "Unknown";
     maskField.textContent = qr.mask;
   };
 
