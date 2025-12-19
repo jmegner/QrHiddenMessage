@@ -38,7 +38,7 @@
     try {
       const qr = qrcodegen.QrCode.encodeText(message, ecl, hiddenMessage);
       drawCanvas(qr, canvas, scale, margin);
-      status.textContent = `QR code generated with ${eclSelect.selectedOptions[0].textContent}.`;
+      status.textContent = `QR code generated at ${formatTimestamp(new Date())}.`;
       setMeta(qr);
     } catch (error) {
       clearCanvas(canvas);
@@ -92,6 +92,29 @@
   };
 
   const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+  const formatTimestamp = (date) => {
+    const pad = (value) => String(value).padStart(2, "0");
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+
+    const offsetMinutes = date.getTimezoneOffset();
+    const totalMinutes = -offsetMinutes;
+    const sign = totalMinutes >= 0 ? "+" : "-";
+    const absoluteMinutes = Math.abs(totalMinutes);
+    const offsetHours = Math.floor(absoluteMinutes / 60);
+    const offsetRemainingMinutes = absoluteMinutes % 60;
+    const formattedOffset =
+      offsetRemainingMinutes === 0
+        ? `${sign}${offsetHours}`
+        : `${sign}${offsetHours}:${pad(offsetRemainingMinutes)}`;
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} UTC${formattedOffset}`;
+  };
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
