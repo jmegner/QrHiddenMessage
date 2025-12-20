@@ -1,5 +1,4 @@
 (() => {
-  const form = document.getElementById("qr-form");
   const textInput = document.getElementById("qr-text");
   const hiddenInput = document.getElementById("qr-hidden");
   const qrImage = document.getElementById("qr-image");
@@ -122,11 +121,6 @@
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} UTC${formattedOffset}`;
   };
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    renderQr();
-  });
 
   ["input", "change"].forEach((eventName) => {
     textInput.addEventListener(eventName, renderQr);
